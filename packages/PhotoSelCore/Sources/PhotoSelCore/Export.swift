@@ -170,6 +170,12 @@ public struct ExportProgress: Equatable, Sendable {
     public var done: Int
     public var total: Int
     public var fileName: String
+
+    public init(done: Int, total: Int, fileName: String) {
+        self.done = done
+        self.total = total
+        self.fileName = fileName
+    }
 }
 
 public struct ExportResult: Equatable, Sendable {

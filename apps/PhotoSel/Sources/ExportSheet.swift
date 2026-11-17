@@ -1,5 +1,6 @@
 import PhotoSelCore
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Export once at the end: which photos, which formats, where, copy or move.
 struct ExportSheet: View {
