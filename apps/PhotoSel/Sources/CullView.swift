@@ -149,7 +149,7 @@ struct EmptyStateView: View {
             Text(none ? "In questa cartella non ci sono foto" : "Nessuna foto con questo filtro")
                 .font(.title2)
                 .foregroundStyle(Theme.text)
-            Text(none ? "Formati letti: JPG, HEIC, PNG, TIFF e i RAW supportati da iPadOS."
+            Text(none ? "Cercate anche nelle sottocartelle. Formati: JPG, HEIC, PNG, TIFF e i RAW supportati da iPadOS."
                       : "Le foto ci sono, ma nessuna corrisponde al filtro scelto.")
                 .font(.footnote)
                 .foregroundStyle(Theme.muted)

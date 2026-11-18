@@ -13,17 +13,6 @@ enum FolderAccess {
         var stale = false
         return try? URL(resolvingBookmarkData: data, options: [], relativeTo: nil, bookmarkDataIsStale: &stale)
     }
-
-    /// Lists the regular files of a folder (not recursive, hidden files skipped).
-    static func listFiles(in folder: URL) throws -> [FileEntry] {
-        let keys: [URLResourceKey] = [.isRegularFileKey, .fileSizeKey, .contentModificationDateKey]
-        let urls = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: keys,
-                                                               options: [.skipsHiddenFiles])
-        return urls.compactMap { url in
-            guard let v = try? url.resourceValues(forKeys: Set(keys)), v.isRegularFile == true else { return nil }
-            return FileEntry(url: url, size: Int64(v.fileSize ?? 0), modified: v.contentModificationDate ?? .distantPast)
-        }
-    }
 }
 
 /// Writes XMP sidecars in order, off the main thread.

@@ -2,6 +2,7 @@ import Foundation
 @testable import PhotoSelCore
 
 let folder = URL(fileURLWithPath: "/photos/100MSDCF", isDirectory: true)
+let card = URL(fileURLWithPath: "/card", isDirectory: true)
 let t0 = Date(timeIntervalSince1970: 1_700_000_000)
 
 func entry(_ name: String, size: Int64 = 100, at seconds: Double = 0) -> FileEntry {

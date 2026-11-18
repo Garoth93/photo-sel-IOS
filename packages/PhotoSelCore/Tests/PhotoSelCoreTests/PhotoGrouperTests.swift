@@ -11,7 +11,7 @@ final class PhotoGrouperTests: XCTestCase {
             entry("DSC0003.xmp"),          // sidecar without photo: ignored
             entry("notes.txt"),            // unsupported: ignored
             entry("DSC0002.JPG", size: 6, at: 11),
-        ], folder: folder, preferRaw: false)
+        ], preferRaw: false)
 
         XCTAssertEqual(photos.map(\.baseName), ["DSC0001", "DSC0002"])
         let p = photos[0]
@@ -26,7 +26,7 @@ final class PhotoGrouperTests: XCTestCase {
     }
 
     func testPreferRaw() {
-        let photos = PhotoGrouper.group([entry("A.JPG"), entry("A.NEF")], folder: folder, preferRaw: true)
+        let photos = PhotoGrouper.group([entry("A.JPG"), entry("A.NEF")], preferRaw: true)
         XCTAssertEqual(photos[0].displayExt, "nef")
         XCTAssertEqual(photos[0].extensionBadges, ["NEF", "JPG"])
     }
@@ -52,7 +52,85 @@ final class PhotoGrouperTests: XCTestCase {
 
     func testExtensions() {
         let photos = PhotoGrouper.group([entry("A.JPG"), entry("A.ARW"), entry("A.xmp"), entry("B.png")],
-                                        folder: folder, preferRaw: false)
+                                        preferRaw: false)
         XCTAssertEqual(PhotoGrouper.extensions(of: photos), ["jpg", "png", "arw", "xmp"])
+    }
+
+    // MARK: - Files of one shot in different folders
+
+    private func at(_ path: String, _ seconds: Double, size: Int64 = 10) -> FileEntry {
+        FileEntry(url: card.appendingPathComponent(path), size: size, modified: t0.addingTimeInterval(seconds))
+    }
+
+    func testPairsJpgAndRawInSeparateFolders() {
+        let photos = PhotoGrouper.group([
+            at("DCIM/100MSDCF/DSC0001.JPG", 0),
+            at("DCIM/100MSDCF/DSC0002.JPG", 5),
+            at("RAW/DSC0001.ARW", 1),
+            at("RAW/DSC0002.ARW", 6),
+            at("RAW/DSC0001.xmp", 100),
+        ], preferRaw: false)
+        XCTAssertEqual(photos.count, 2)
+        let p = photos.first { $0.baseName == "DSC0001" }!
+        XCTAssertEqual(Set(p.files.keys), ["jpg", "arw", "xmp"])
+        XCTAssertEqual(p.displayExt, "jpg")
+        XCTAssertEqual(p.folder.lastPathComponent, "RAW")            // sidecars next to the RAW
+        XCTAssertEqual(p.xmpURL.path, card.appendingPathComponent("RAW/DSC0001.xmp").path)
+        XCTAssertEqual(p.directories.count, 2)
+        let q = photos.first { $0.baseName == "DSC0002" }!
+        XCTAssertEqual(q.xmpURL.path, card.appendingPathComponent("RAW/DSC0002.xmp").path)
+        XCTAssertNil(q.files["xmp"])
+    }
+
+    func testCounterWrapKeepsDifferentShotsApart() {
+        // same names in two folders, hours apart: four different files -> three shots
+        let photos = PhotoGrouper.group([
+            at("DCIM/100MSDCF/DSC0001.JPG", 0),
+            at("DCIM/100MSDCF/DSC0001.ARW", 1),
+            at("DCIM/105MSDCF/DSC0001.JPG", 20_000),
+            at("DCIM/106MSDCF/DSC0001.ARW", 50_000),
+        ], preferRaw: false)
+        XCTAssertEqual(photos.count, 3)
+        XCTAssertEqual(photos.map { $0.files.count }.sorted(), [1, 1, 2])
+    }
+
+    func testSplitFoldersWithWrapUseCaptureTime() {
+        // modification dates are useless here (files copied later): EXIF decides
+        let exif: [String: Double] = [
+            "JPG/100/DSC0001.JPG": 0, "JPG/101/DSC0001.JPG": 9000,
+            "RAW/100/DSC0001.ARW": 1, "RAW/101/DSC0001.ARW": 9001,
+        ]
+        let entries = exif.keys.map { at($0, 500) }
+        let photos = PhotoGrouper.group(entries, preferRaw: false) { url in
+            let rel = PhotoGrouper.relativePath(of: url, to: card)
+            return exif[rel].map { t0.addingTimeInterval($0) }
+        }
+        XCTAssertEqual(photos.count, 2)
+        for p in photos {
+            let jpgDir = p.files["jpg"]!.deletingLastPathComponent().lastPathComponent
+            let rawDir = p.files["arw"]!.deletingLastPathComponent().lastPathComponent
+            XCTAssertEqual(jpgDir, rawDir)
+        }
+    }
+
+    func testSidecarGoesToPhotoInSameFolder() {
+        let photos = PhotoGrouper.group([
+            at("A/DSC0001.JPG", 0), at("A/DSC0001.xmp", 0),
+            at("B/DSC0001.JPG", 90_000),
+        ], preferRaw: false)
+        XCTAssertEqual(photos.count, 2)
+        let a = photos.first { $0.folder.lastPathComponent == "A" }!
+        let b = photos.first { $0.folder.lastPathComponent == "B" }!
+        XCTAssertNotNil(a.files["xmp"])
+        XCTAssertNil(b.files["xmp"])
+    }
+
+    func testIdentityAndRelativePath() {
+        let photos = PhotoGrouper.group([at("J/X.JPG", 0), at("R/X.ARW", 0)], preferRaw: false)
+        let raw = PhotoGrouper.group([at("J/X.JPG", 0), at("R/X.ARW", 0)], preferRaw: true)
+        XCTAssertEqual(photos[0].identity, raw[0].identity)       // stable when the shown file changes
+        XCTAssertEqual(PhotoGrouper.relativePath(of: card.appendingPathComponent("DCIM/100"), to: card), "DCIM/100")
+        XCTAssertEqual(PhotoGrouper.relativePath(of: card, to: card), "")
+        XCTAssertEqual(PhotoGrouper.relativePath(of: URL(fileURLWithPath: "/other/x"), to: card), "x")
     }
 }

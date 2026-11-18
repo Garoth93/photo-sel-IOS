@@ -45,11 +45,22 @@ public struct Photo: Identifiable, Equatable, Sendable {
     }
 
     public var displayURL: URL? { files[displayExt] }
+
+    /// Stable across reloads, also when "show the RAW" changes the shown file.
+    public var identity: String { (rawURL ?? displayURL)?.path ?? baseName }
+
+    /// Folders containing the files of this photo (JPG and RAW may be apart).
+    public var directories: [URL] {
+        var seen = Set<String>()
+        return files.keys.sorted().compactMap { files[$0]?.deletingLastPathComponent() }
+            .filter { seen.insert($0.standardizedFileURL.path).inserted }
+    }
     public var displayFileName: String { displayURL?.lastPathComponent ?? baseName }
     public var hasRaw: Bool { files.keys.contains { FileKinds.isRaw($0) } }
     public var isBurst: Bool { burstSize > 1 }
 
-    /// The sidecar path, whether it exists or not.
+    /// The sidecar path, whether it exists or not. `folder` is the folder of the
+    /// RAW (or of the shown file), so a new sidecar goes where Lightroom expects it.
     public var xmpURL: URL {
         files[FileKinds.sidecar] ?? folder.appendingPathComponent(baseName + ".xmp")
     }

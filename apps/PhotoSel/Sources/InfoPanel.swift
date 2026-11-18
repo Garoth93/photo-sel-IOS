@@ -94,6 +94,7 @@ struct InfoPanel: View {
             row("Fotocamera", e.cameraText)
             row("Data", e.captured.map { Self.dateFormatter.string(from: $0) } ?? "")
             row("Dimensioni", p.dimensionsText)
+            row(p.directories.count > 1 ? "Cartelle" : "Cartella", store.folderText(p))
         }
     }
 

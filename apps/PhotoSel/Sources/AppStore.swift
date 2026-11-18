@@ -65,6 +65,8 @@ final class AppStore {
     @ObservationIgnored private var accessing: URL?
     @ObservationIgnored private var exportCancel = CancelFlag()
     @ObservationIgnored private var toastTask: Task<Void, Never>?
+    /// Export folder chosen outside the default subfolder: not scanned as photos.
+    @ObservationIgnored private var customDestination: URL?
 
     init() {
         let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -124,7 +126,7 @@ final class AppStore {
             let recent = RecentFolder(name: url.lastPathComponent, path: url.path, bookmark: bookmark, opened: Date())
             settings.recents = RecentFolder.adding(recent, to: settings.recents)
         }
-        startScan(keepBaseName: nil)
+        startScan(keepIdentity: nil)
     }
 
     func forgetRecent(_ recent: RecentFolder) {
@@ -148,7 +150,7 @@ final class AppStore {
 
     func reload() {
         guard hasFolder else { return }
-        startScan(keepBaseName: current?.baseName)
+        startScan(keepIdentity: current?.identity)
     }
 
     private func stopAccess() {
@@ -161,7 +163,7 @@ final class AppStore {
         return FileManager.default.fileExists(atPath: url.path, isDirectory: &dir) && dir.boolValue
     }
 
-    private func startScan(keepBaseName: String?) {
+    private func startScan(keepIdentity: String?) {
         guard let folder else { return }
         scanTask?.cancel()
         analysisTask?.cancel()
@@ -173,16 +175,22 @@ final class AppStore {
         let preferRaw = settings.preferRaw
         let gap = settings.burstGapMs
         let filter = session.filter
+        // the app's own output folders are not photos to rate
+        var excluded = [
+            folder.appendingPathComponent(ExportOptions.cleanFolderName(settings.export.subfolder, fallback: "selezionate")),
+            folder.appendingPathComponent(ExportOptions.cleanFolderName(settings.export.rejectFolder, fallback: "da_eliminare")),
+        ]
+        if let customDestination { excluded.append(customDestination) }
 
         scanTask = Task {
             let result = await Task.detached(priority: .userInitiated) {
-                Result { try AppStore.scan(folder: folder, preferRaw: preferRaw, burstGapMs: gap) }
+                Result { try AppStore.scan(folder: folder, excluding: excluded, preferRaw: preferRaw, burstGapMs: gap) }
             }.value
             guard gen == generation else { return }
             scanning = false
             switch result {
             case .success(let photos):
-                session = CullSession(photos: photos, filter: filter, keepBaseName: keepBaseName,
+                session = CullSession(photos: photos, filter: filter, keepIdentity: keepIdentity,
                                       autoAdvance: settings.autoAdvance, compareSize: settings.compareSize)
                 didMove()
                 startAnalysis()
@@ -193,10 +201,13 @@ final class AppStore {
         }
     }
 
-    /// Lists, groups and reads metadata and XMP ratings. Runs off the main thread.
-    nonisolated private static func scan(folder: URL, preferRaw: Bool, burstGapMs: Int) throws -> [Photo] {
-        let entries = try FolderAccess.listFiles(in: folder)
-        var photos = PhotoGrouper.group(entries, folder: folder, preferRaw: preferRaw)
+    /// Lists the folder and its subfolders, pairs JPG/RAW/XMP also across
+    /// folders, reads metadata and XMP ratings. Runs off the main thread.
+    nonisolated private static func scan(folder: URL, excluding: [URL], preferRaw: Bool, burstGapMs: Int) throws -> [Photo] {
+        let entries = try FolderScanner.listFiles(in: folder, excluding: excluding)
+        var photos = PhotoGrouper.group(entries, preferRaw: preferRaw) { url in
+            ImageService.metadata(url).exif.captured
+        }
         for i in photos.indices {
             if Task.isCancelled { break }
             guard let url = photos[i].displayURL else { continue }
@@ -418,6 +429,7 @@ final class AppStore {
         settings.export = remembered
 
         let dest = destination ?? folder.appendingPathComponent(o.subfolder, isDirectory: true)
+        if let destination { customDestination = destination }
         let plan: ExportPlan
         switch ExportPlanner.plan(photos: session.photos, options: o, folder: folder, destination: dest) {
         case .success(let p): plan = p
@@ -469,6 +481,15 @@ final class AppStore {
     }
 
     func cancelExport() { exportCancel.set() }
+
+    /// "DCIM/100MSDCF · RAW": where the files of a photo are, relative to the opened folder.
+    func folderText(_ p: Photo) -> String {
+        guard let folder else { return "" }
+        return p.directories.map { dir -> String in
+            let rel = PhotoGrouper.relativePath(of: dir, to: folder)
+            return rel.isEmpty ? folder.lastPathComponent : rel
+        }.joined(separator: " · ")
+    }
 
     // MARK: - Cache
 

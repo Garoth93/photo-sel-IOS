@@ -25,8 +25,17 @@ con **Run workflow**. Gli artifact restano scaricabili 30 giorni.
 ## Flusso di lavoro su iPad
 
 1. **Apri** una cartella da File: memoria dell'iPad, iCloud Drive, scheda SD
-   (lettore USB-C o fotocamera collegata, cartella `DCIM/…`), disco esterno.
-   Le cartelle aperte restano tra le recenti.
+   (lettore USB-C o fotocamera collegata), disco esterno. Le cartelle aperte
+   restano tra le recenti.
+   - Le foto vengono cercate anche nelle sottocartelle (fino a 6 livelli): puoi
+     aprire la scheda intera o la cartella `DCIM`.
+   - JPG, RAW e XMP con lo stesso nome sono una foto sola anche se stanno in
+     cartelle diverse (per esempio `DCIM/100MSDCF/DSC0001.JPG` e `RAW/DSC0001.ARW`).
+   - Se la numerazione della fotocamera è ripartita e lo stesso nome compare in
+     cartelle diverse per scatti diversi, decide l'ora di scatto: i file vengono
+     abbinati solo se sono stati scattati a meno di 2 minuti l'uno dall'altro.
+   - Le cartelle create dall'export (`selezionate`, `da_eliminare` o quella scelta)
+     non vengono lette come foto da valutare.
 2. **Valuta** con i pulsanti della barra in basso o con la tastiera.
    - P tieni, X scarta, U togli. Da 1 a 5 le stelle, da 6 a 9 le etichette colore.
    - Con "Avanza dopo il voto" attivo passa da sola alla foto successiva.
@@ -47,6 +56,7 @@ e viceversa, e Lightroom/Bridge leggono stelle, scartate (rating −1) ed etiche
 | Desktop (Qt) | iPad |
 |---|---|
 | Rilevamento automatico delle schede SD | iPadOS non elenca i volumi: la scheda si apre da File |
+| Solo la cartella aperta, JPG e RAW nella stessa cartella | Anche le sottocartelle, JPG e RAW abbinati anche in cartelle diverse |
 | Trascina una cartella nella finestra | Apri cartella da File; le recenti si riaprono con un tocco |
 | Parser EXIF interno + LibRaw | ImageIO di sistema: legge i RAW supportati da iPadOS (ARW, CR2/CR3, NEF, RAF, DNG, ORF, RW2…) |
 | Anteprima RAW sempre dall'JPEG incorporato | Anteprima incorporata per scorrere, decodifica RAW piena quando zoomi al 100% |
@@ -60,7 +70,8 @@ e viceversa, e Lightroom/Bridge leggono stelle, scartate (rating −1) ed etiche
 apps/PhotoSel/              app SwiftUI (viste, ImageIO, accesso alle cartelle)
   project.yml               spec XcodeGen (il .xcodeproj si genera in CI)
 packages/PhotoSelCore/      logica senza UI, testata anche su Linux
-  PhotoGrouper              raggruppamento JPG+RAW+XMP, ordine cronologico, raffiche
+  PhotoGrouper              abbinamento JPG+RAW+XMP anche tra cartelle, ordine cronologico, raffiche
+  FolderScanner             lettura ricorsiva della cartella aperta
   CullSession               filtri, voti, annulla, finestra del confronto, nitidezza
   Xmp                       lettura/scrittura sidecar compatibili Lightroom
   ImageAnalysis             nitidezza (Laplaciano a tasselli) e istogramma

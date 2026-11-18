@@ -68,7 +68,8 @@ struct WelcomeView: View {
 
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Come funziona").font(.headline).foregroundStyle(Theme.text)
-                    tip("sdcard", "Collega il lettore di schede o la fotocamera all'iPad, poi in File scegli la cartella DCIM/… con le foto.")
+                    tip("sdcard", "Collega il lettore di schede o la fotocamera all'iPad, poi in File scegli la scheda intera o la cartella DCIM.")
+                    tip("folder.badge.questionmark", "Le foto vengono cercate anche nelle sottocartelle: JPG e RAW dello stesso scatto sono abbinati anche se stanno in cartelle diverse.")
                     tip("star", "Valuta con i pulsanti in basso o con la tastiera: P tieni, X scarta, 1–5 stelle, 6–9 etichette.")
                     tip("square.split.2x1", "Le raffiche sono raggruppate: nel confronto ◆ indica la più nitida e lo zoom è sincronizzato.")
                     tip("doc.badge.gearshape", "Le valutazioni sono salvate in file .xmp accanto alle foto: Lightroom e Bridge le leggono.")

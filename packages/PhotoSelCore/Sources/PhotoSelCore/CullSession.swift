@@ -63,7 +63,7 @@ public struct CullSession: Sendable {
 
     /// `photos` must already be finalized (uid == index, see `PhotoGrouper.finalize`).
     /// With a filter that hides everything, falls back to "all" like the Qt app.
-    public init(photos: [Photo], filter: PhotoFilter = .all, keepBaseName: String? = nil,
+    public init(photos: [Photo], filter: PhotoFilter = .all, keepIdentity: String? = nil,
                 autoAdvance: Bool = true, compareSize: Int = 3) {
         self.photos = photos
         self.autoAdvance = autoAdvance
@@ -76,7 +76,7 @@ public struct CullSession: Sendable {
         }
         refreshCounts()
         var row = 0
-        if let keep = keepBaseName, let r = visible.firstIndex(where: { self.photos[$0].baseName == keep }) {
+        if let keep = keepIdentity, let r = visible.firstIndex(where: { self.photos[$0].identity == keep }) {
             row = r
         }
         select(row: visible.isEmpty ? -1 : row)

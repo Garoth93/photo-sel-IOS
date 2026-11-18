@@ -78,7 +78,8 @@ final class CullSessionTests: XCTestCase {
     }
 
     func testInitFallsBackToAllAndKeepsName() {
-        let s = CullSession(photos: makePhotos([0, 10, 20]), filter: .picks, keepBaseName: "P2")
+        let photos = makePhotos([0, 10, 20])
+        let s = CullSession(photos: photos, filter: .picks, keepIdentity: photos[2].identity)
         XCTAssertEqual(s.filter, .all)
         XCTAssertEqual(s.current?.baseName, "P2")
         XCTAssertTrue(CullSession.empty.isEmpty)

@@ -45,7 +45,7 @@ PhotoSel è la conversione nativa dell'app desktop Qt 6/QML
 
 | Qt / C++ | Equivalente iPad |
 |---|---|
-| `scanFolder`, raggruppamento JPG+RAW+XMP, raffiche | `PhotoGrouper` (package) + `FolderAccess.listFiles` |
+| `scanFolder`, raggruppamento JPG+RAW+XMP, raffiche | `FolderScanner` (ricorsivo, 6 livelli) + `PhotoGrouper` (package). Differenza voluta: i file di uno scatto possono stare in cartelle diverse; stesso nome in cartelle diverse = stesso scatto solo se l'ora di scatto EXIF differisce di ≤ 120 s (`pairingTolerance`). Il nuovo XMP va accanto al RAW |
 | `AppController` + `PhotoModel` (filtri, voti, annulla, confronto, nitidezza relativa) | `CullSession` (package, struct) + `AppStore` (@Observable) |
 | `XmpSidecar` | `Xmp` (package) + `XmpWriter` (coda seriale) |
 | `ImageAnalysis` (Laplaciano a tasselli, istogramma) | `ImageAnalysis` su buffer di pixel (package) + `PixelBuffers` (CGContext) |
