@@ -101,6 +101,9 @@ struct HelpSheet: View {
         ("B", "Sfondo del visualizzatore"),
         ("Tab", "Solo la foto"),
         ("Esc", "Torna alla vista singola"),
+        ("L", "Apri in Lightroom (foto corrente o selezione)"),
+        ("S", "Selezione multipla nella griglia"),
+        ("Spazio (selezione)", "Seleziona / deseleziona la foto corrente"),
         ("⌘Z", "Annulla"),
         ("⌘1…5", "Filtri"),
         ("⌘E", "Esporta"),
@@ -117,6 +120,7 @@ struct HelpSheet: View {
         ("Griglia: doppio tocco", "Apre la foto"),
         ("Griglia: tocco prolungato", "Valuta senza aprire"),
         ("Tocco sulla stella già scelta", "Toglie le stelle"),
+        ("Griglia: Seleziona", "Scegli più foto e aprile in Lightroom"),
     ]
 
     var body: some View {

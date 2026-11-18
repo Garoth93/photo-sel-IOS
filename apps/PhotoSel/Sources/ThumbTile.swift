@@ -37,6 +37,8 @@ struct ThumbTile: View {
     let photo: Photo
     let isCurrent: Bool
     var compact = false
+    /// nil = not in selection mode.
+    var selected: Bool? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 3 : 5) {
@@ -59,6 +61,20 @@ struct ThumbTile: View {
             .overlay {
                 RoundedRectangle(cornerRadius: 6)
                     .strokeBorder(isCurrent ? Theme.accent : Color.clear, lineWidth: compact ? 2.5 : 3)
+            }
+            .overlay {
+                if let selected {
+                    ZStack(alignment: .topTrailing) {
+                        RoundedRectangle(cornerRadius: 6).fill(Color.black.opacity(selected ? 0 : 0.35))
+                        Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                            .font(.system(size: 26, weight: .semibold))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(selected ? Color.white : Color.white.opacity(0.8),
+                                             selected ? Color.blue : Color.black.opacity(0.3))
+                            .padding(8)
+                    }
+                    .allowsHitTesting(false)
+                }
             }
             .aspectRatio(compact ? 1.45 : 1.3, contentMode: .fit)
 

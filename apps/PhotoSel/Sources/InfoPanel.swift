@@ -118,13 +118,15 @@ struct InfoPanel: View {
         HStack(spacing: 4) {
             IconButton(systemImage: "rotate.left", help: "Ruota a sinistra (Maiusc+R)") { store.rotate(-1) }
             IconButton(systemImage: "rotate.right", help: "Ruota a destra (R)") { store.rotate(1) }
-            if let url = p.displayURL {
-                ShareLink(item: url) {
-                    Image(systemName: "square.and.arrow.up")
-                        .frame(width: 40, height: 36)
-                }
-                .foregroundStyle(Theme.muted)
+            Spacer()
+            Button {
+                store.share([p])
+            } label: {
+                Label("Apri in Lightroom…", systemImage: "square.and.arrow.up")
+                    .font(.footnote.weight(.semibold))
             }
+            .buttonStyle(.bordered)
+            .help("Condividi il file (L): scegli Lightroom nel foglio di condivisione")
         }
     }
 

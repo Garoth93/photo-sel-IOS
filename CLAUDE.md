@@ -56,7 +56,7 @@ PhotoSel è la conversione nativa dell'app desktop Qt 6/QML
 | `FolderDialog`, drag & drop, schede SD (`QStorageInfo`) | `fileImporter` cartella + bookmark security-scoped per le recenti; le schede SD si aprono da File (iPadOS non elenca i volumi) |
 | `Shortcut` QML | `.onKeyPress` (tasti singoli, serve il focus) + `Commands` per le scorciatoie con ⌘ |
 | `ZoomImage` / zoom sincronizzato | `ZoomableImageView` (UIScrollView) + `ZoomSync` |
-| "Mostra nella cartella" | Condividi (`ShareLink`) |
+| "Mostra nella cartella" | Condividi / "Apri in Lightroom…": `UIActivityViewController` con gli URL dei file (`SharePresenter`), anche per una selezione multipla nella griglia (`PhotoSelection`, `ShareFiles` nel package). Lightroom per iPad non ha uno schema URL pubblico per importare file: si passa dal foglio di condivisione |
 
 Il codice Qt originale non va modificato da questa repo.
 

@@ -12,6 +12,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
     public var compareSize = 3
     public var filmstripVisible = true
     public var export = ExportOptions()
+    public var shareFormat = ShareFormat.raw
     public var recents: [RecentFolder] = []
 
     public static let burstGapRange = 200...5000
@@ -31,6 +32,7 @@ public struct AppSettings: Codable, Equatable, Sendable {
         compareSize = min(max((try? c.decodeIfPresent(Int.self, forKey: .compareSize)) ?? d.compareSize, 2), 4)
         filmstripVisible = (try? c.decodeIfPresent(Bool.self, forKey: .filmstripVisible)) ?? d.filmstripVisible
         export = (try? c.decodeIfPresent(ExportOptions.self, forKey: .export)) ?? d.export
+        shareFormat = (try? c.decodeIfPresent(ShareFormat.self, forKey: .shareFormat)) ?? d.shareFormat
         recents = (try? c.decodeIfPresent([RecentFolder].self, forKey: .recents)) ?? d.recents
     }
 

@@ -47,6 +47,12 @@ con **Run workflow**. Gli artifact restano scaricabili 30 giorni.
    formato, spostamento delle scartate in `da_eliminare`, e se aggiungerle anche
    alla libreria Foto.
 
+**Aprire in Lightroom.** Dal pannello informazioni ("Apri in Lightroom…", tasto L)
+per la foto corrente, oppure dalla griglia con **Seleziona** per più foto insieme
+(Tutte, Tenute o a tocchi). Si apre il foglio di condivisione di iPadOS: scegli
+Lightroom e le foto vengono importate. Il menu accanto sceglie cosa inviare di ogni
+foto: il RAW se c'è (predefinito), il JPG se c'è, o tutti i file.
+
 Le valutazioni sono salvate in un file `.xmp` accanto a ogni foto, nello stesso
 formato della versione desktop: le valutazioni fatte sull'iPad si ritrovano sul PC
 e viceversa, e Lightroom/Bridge leggono stelle, scartate (rating −1) ed etichette.
@@ -60,7 +66,7 @@ e viceversa, e Lightroom/Bridge leggono stelle, scartate (rating −1) ed etiche
 | Trascina una cartella nella finestra | Apri cartella da File; le recenti si riaprono con un tocco |
 | Parser EXIF interno + LibRaw | ImageIO di sistema: legge i RAW supportati da iPadOS (ARW, CR2/CR3, NEF, RAF, DNG, ORF, RW2…) |
 | Anteprima RAW sempre dall'JPEG incorporato | Anteprima incorporata per scorrere, decodifica RAW piena quando zoomi al 100% |
-| "Mostra in Esplora file" | Condividi il file |
+| "Mostra in Esplora file" | Condividi / apri in Lightroom, anche più foto insieme |
 | Solo copia/spostamento su disco | In più: aggiungi alla libreria Foto (JPG + RAW come unica foto) |
 | Solo tastiera e mouse | Gesti touch + tutte le scorciatoie con tastiera esterna |
 

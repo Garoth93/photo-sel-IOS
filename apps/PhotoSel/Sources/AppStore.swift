@@ -49,6 +49,9 @@ final class AppStore {
     private(set) var zoomRequest = ZoomRequest()
     /// Columns of the grid, used by ↑ ↓.
     var gridColumns = 4
+    /// Multi-selection in the grid (to send many photos to Lightroom).
+    var selecting = false
+    private(set) var selection = PhotoSelection()
 
     // Export
     private(set) var exporting = false
@@ -141,6 +144,7 @@ final class AppStore {
         stopAccess()
         folder = nil
         session = .empty
+        endSelection()
         scanning = false
         analysisDone = 0
         analysisTotal = 0
@@ -170,6 +174,7 @@ final class AppStore {
         generation += 1
         let gen = generation
         scanning = true
+        endSelection()
         analysisDone = 0
         analysisTotal = 0
         let preferRaw = settings.preferRaw
@@ -489,6 +494,46 @@ final class AppStore {
             let rel = PhotoGrouper.relativePath(of: dir, to: folder)
             return rel.isEmpty ? folder.lastPathComponent : rel
         }.joined(separator: " · ")
+    }
+
+    // MARK: - Selection and sharing (Lightroom)
+
+    func beginSelection() {
+        selecting = true
+        viewMode = .grid
+        selection.clear()
+        if let uid = current?.uid { selection.toggle(uid) }
+    }
+
+    func endSelection() {
+        selecting = false
+        selection.clear()
+    }
+
+    func toggleSelected(_ uid: Int) {
+        selection.toggle(uid)
+        select(uid: uid)
+    }
+
+    func selectAllVisible() { selection.set(session.visible) }
+    func selectPicksVisible() { selection.set(session.visible.filter { session.photo(uid: $0)?.flag == 1 }) }
+    func clearSelection() { selection.clear() }
+
+    var selectedPhotos: [Photo] { selection.photos(in: session) }
+
+    /// Opens the share sheet with the files of the photos (Lightroom, File, AirDrop…).
+    func share(_ photos: [Photo]) {
+        let urls = ShareFiles.urls(for: photos, format: settings.shareFormat)
+        guard !urls.isEmpty else {
+            showToast("Nessun file da condividere")
+            return
+        }
+        xmp.flush()
+        SharePresenter.present(urls)
+    }
+
+    func shareCurrentOrSelection() {
+        if selecting && !selection.isEmpty { share(selectedPhotos) } else if let p = current { share([p]) }
     }
 
     // MARK: - Cache

@@ -94,13 +94,13 @@ struct CullView: View {
         case .home: store.first(); return true
         case .end: store.last(); return true
         case .return:
-            store.viewMode = .loupe
+            if store.selecting { store.shareCurrentOrSelection() } else { store.viewMode = .loupe }
             return true
         case .space:
-            toggleZoom()
+            if store.selecting, let uid = store.current?.uid { store.toggleSelected(uid) } else { toggleZoom() }
             return true
         case .escape:
-            if store.chromeHidden { store.chromeHidden = false } else if store.viewMode != .loupe { store.viewMode = .loupe }
+            if store.selecting { store.endSelection() } else if store.chromeHidden { store.chromeHidden = false } else if store.viewMode != .loupe { store.viewMode = .loupe }
             return true
         case .tab:
             withAnimation(.easeInOut(duration: 0.2)) { store.chromeHidden.toggle() }
@@ -130,6 +130,9 @@ struct CullView: View {
             store.setAutoAdvance(!store.settings.autoAdvance)
             store.showToast(store.settings.autoAdvance ? "Avanza dopo il voto" : "Resta sulla foto dopo il voto")
         case "h", "?": store.activeSheet = .help
+        case "l": store.shareCurrentOrSelection()
+        case "s":
+            if store.selecting { store.endSelection() } else { store.beginSelection() }
         default: return false
         }
         return true
