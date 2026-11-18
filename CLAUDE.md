@@ -38,7 +38,7 @@ App presenti:
 
 | App      | Package logica | Bundle ID                 | Deployment target | Dispositivi |
 |----------|----------------|---------------------------|-------------------|-------------|
-| PhotoSel | PhotoSelCore   | `com.garoth93.photosel`   | iPadOS 17.0       | solo iPad (`TARGETED_DEVICE_FAMILY: 2`) |
+| PhotoSel | PhotoSelCore   | `com.garoth93.photosel`   | iPadOS 26.0       | solo iPad (`TARGETED_DEVICE_FAMILY: 2`) |
 
 PhotoSel è la conversione nativa dell'app desktop Qt 6/QML
 [photo-sel-qml](https://github.com/Garoth93/photo-sel-qml) (C++17). Mappa usata:
@@ -76,8 +76,8 @@ con `name`, target e scheme nel `project.yml`.
   Tutto ciò che è testabile va lì e ha un test.
 - Nell'app: `@Observable` (framework Observation) + `@MainActor`, iniettato
   con `.environment(...)` e letto con `@Environment(Tipo.self)`; viste piccole,
-  stringhe UI in italiano. Target iPadOS 17.0: le API di iOS 18+ vanno
-  protette con `#available`.
+  stringhe UI in italiano. Target iPadOS 26.0 (l'iPad dell'utente ha
+  iPadOS 26): si possono usare le API SwiftUI di iOS 26 senza `#available`.
 - Palette neutra (`Theme`): l'interfaccia non deve alterare la percezione dei
   colori delle foto; l'unico colore di carattere è l'ambra della foto corrente.
 - Persistenza: JSON in Application Support tramite `JSONFileStore` (o
